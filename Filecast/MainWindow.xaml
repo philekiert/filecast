@@ -5,8 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Filecast"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-
+        Title="Filecast" Background="White" SizeToContent="WidthAndHeight" Height="66" Width="300"
+        ResizeMode="NoResize">
+    <Grid Height="50" Width="300" Background="#FF292B2D">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25" />
+            <RowDefinition Height="25" />
+        </Grid.RowDefinitions>
+        <Label x:Name="lblFile" Grid.Row="0"
+               FontFamily="Roboto Mono" FontWeight="Regular" Foreground="White" FontSize="12"
+               Content="Yuppers"/>
+        <Label x:Name="lblTime" Grid.Row="1"
+               FontFamily="Roboto Mono" FontWeight="Regular" Foreground="White" FontSize="12"
+               Content="00:00:00 01:34:22 -> 03:24:00"/>
     </Grid>
 </Window>
+    
