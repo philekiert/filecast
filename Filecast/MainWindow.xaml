@@ -5,19 +5,49 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Filecast"
         mc:Ignorable="d"
-        Title="Filecast" Background="White" SizeToContent="WidthAndHeight" Height="66" Width="300"
-        ResizeMode="NoResize">
-    <Grid Height="50" Width="300" Background="#FF292B2D">
+        Title="Filecast" Background="Transparent" SizeToContent="WidthAndHeight" Height="90" Width="300"
+        ResizeMode="NoResize" WindowStyle="None" AllowsTransparency="True" KeyDown="Grid_KeyDown">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="25" />
-            <RowDefinition Height="25" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="60" />
         </Grid.RowDefinitions>
-        <Label x:Name="lblFile" Grid.Row="0"
+        <Border Grid.Row="0" CornerRadius="16,16,0,0" BorderThickness="1,1,1,0" BorderBrush="#FF383B3E"
+                Height="30" Background="#FF1D1E1F">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="30"/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
+                <Label x:Name="lblTitle" Grid.Column="0" FontFamily="Roboto Mono" FontWeight="Regular" FontSize="12"
+                       Foreground="#FFC7C7C7" Content="Filecast" Margin="4,2,26,-2" Grid.ColumnSpan="2"
+                       MouseDown="Window_MouseDown"/>
+                <Label x:Name="lbl_" Grid.Column="1" FontFamily="Roboto Mono" FontSize="16" Foreground="#FF74D6FF"
+                       Content="_" Height="30" Width="30" FontWeight="SemiBold" Padding="10,1,0,0"
+                       Background="#FF161617" MouseEnter="lbl__MouseEnter" MouseLeave="lbl__MouseLeave"
+                       MouseLeftButtonDown="lbl__MouseLeftButtonDown" MouseLeftButtonUp="lbl__MouseLeftButtonUp" />
+                <Label x:Name="lblX" Grid.Column="2" FontFamily="Roboto Mono" FontSize="12" Foreground="#FFF36AA9"
+                       Content="X" Height="30" Width="30" FontWeight="SemiBold" Padding="11,7,0,0"
+                       MouseEnter="lblX_MouseEnter" MouseLeave="lblX_MouseLeave"
+                       MouseLeftButtonDown="lblX_MouseLeftButtonDown" MouseLeftButtonUp="lblX_MouseLeftButtonUp"/>
+            </Grid>
+        </Border>
+        <Border Grid.Row="1" CornerRadius="0,0,16,16" Height="60" Width="300" Background="#FF292B2D"
+                BorderThickness="1,0,1,1" BorderBrush="#FF383B3E">
+            <Grid Height="50" Width="290">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="30" />
+                </Grid.RowDefinitions>
+                <Label x:Name="lblFile" Grid.Row="0"
                FontFamily="Roboto Mono" FontWeight="Regular" Foreground="White" FontSize="12"
-               Content="Yuppers"/>
-        <Label x:Name="lblTime" Grid.Row="1"
+               Content="Tammany Hall NYC - Cindy.mp3" Margin="0,-1,0,1"/>
+                <Label x:Name="lblTime"
                FontFamily="Roboto Mono" FontWeight="Regular" Foreground="White" FontSize="12"
-               Content="00:00:00 01:34:22 -> 03:24:00"/>
+               Content="01:34:22  [------/----------]  03:24:00" Margin="0,24,0,6" Grid.RowSpan="2"/>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
     
