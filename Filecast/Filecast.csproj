@@ -5,7 +5,7 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>FilecastLogo.ico</ApplicationIcon>
+    <ApplicationIcon>Filecast.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="FilecastLogo.ico" />
+    <Content Include="Filecast.ico" />
   </ItemGroup>
 
   <ItemGroup>
