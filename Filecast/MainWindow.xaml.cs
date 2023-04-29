@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Media;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -19,6 +21,8 @@ using System.Windows.Threading;
 using NAudio.Utils;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using NHotkey;
+using NHotkey.Wpf;
 
 namespace Filecast
 {
@@ -27,6 +31,10 @@ namespace Filecast
         public MainWindow()
         {
             InitializeComponent();
+
+            HotkeyManager.Current.AddOrReplace("PreviousTrack", Key.MediaPreviousTrack, ModifierKeys.None, MediaPreviousTrack);
+            HotkeyManager.Current.AddOrReplace("NextTrack", Key.MediaNextTrack, ModifierKeys.None, MediaNextTrack);
+            HotkeyManager.Current.AddOrReplace("PlayPause", Key.MediaPlayPause, ModifierKeys.None, MediaPlayPause);
 
             Blackout();
 
@@ -221,7 +229,7 @@ namespace Filecast
         }
 
 
-        //   N A V I G A T I O  N
+        //   N A V I G A T I O N
 
         private void Grid_KeyDown(object sender, KeyEventArgs e)
         {
@@ -240,12 +248,7 @@ namespace Filecast
                     }
                     // Slow skip backward.
                     else
-                    {
-                        if (Au.audioFile.CurrentTime.TotalSeconds > 5)
-                            Au.audioFile.CurrentTime -= new TimeSpan(0, 0, 5);
-                        else
-                            Au.audioFile.CurrentTime = new TimeSpan(0);
-                    }
+                        SkipShort(false);
                 }
                 else if (e.Key == Key.D && fileName.Length > 0)
                 {
@@ -256,24 +259,23 @@ namespace Filecast
                         if (Au.audioFile.Position > Au.audioFile.Length)
                             Au.audioFile.Position = Au.audioFile.Length;
                     }
-                    // Slow skip backward.
+                    // Slow skip forward.
                     else
                     {
-                        Au.audioFile.CurrentTime += new TimeSpan(0, 0, 5);
-                        if (Au.audioFile.Position > Au.audioFile.Length)
-                            Au.audioFile.Position = Au.audioFile.Length;
+                        SkipShort(true);
+                        // If Position == Length, Tick() skips to the next track. Prevent this in case of short skip.
+                        if (Au.audioFile.Position == Au.audioFile.Length && Au.audioFile.Length > 0)
+                        {
+                            Au.audioFile.Position = Au.audioFile.Length - 1;
+                            if (Au.waveOut.PlaybackState == PlaybackState.Playing)
+                                Au.waveOut.Pause();
+                        }
                     }
                 }
 
                 // Play/Pause
                 else if (e.Key == Key.Space && fileName.Length > 0)
-                {
-                    if (Au.waveOut.PlaybackState == PlaybackState.Playing)
-                        Au.waveOut.Pause();
-                    else if (Au.waveOut.PlaybackState == PlaybackState.Paused ||
-                             Au.waveOut.PlaybackState == PlaybackState.Stopped)
-                        Au.waveOut.Play();
-                }
+                    PlayPause();
 
                 // Skip track.
                 else if (e.Key == Key.Q || e.Key == Key.E)
@@ -339,6 +341,33 @@ namespace Filecast
                 fileName = "";
             }
         }
+        void SkipShort(bool forward)
+        {
+            if (Au.audioFile != null)
+            {
+                if (forward)
+                {
+                    Au.audioFile.CurrentTime += new TimeSpan(0, 0, 5);
+                    if (Au.audioFile.Position > Au.audioFile.Length)
+                        Au.audioFile.Position = Au.audioFile.Length;
+                }
+                else
+                {
+                    if (Au.audioFile.CurrentTime.TotalSeconds > 5)
+                        Au.audioFile.CurrentTime -= new TimeSpan(0, 0, 5);
+                    else
+                        Au.audioFile.CurrentTime = new TimeSpan(0);
+                }
+            }
+        }
+        void PlayPause()
+        {
+            if (Au.waveOut.PlaybackState == PlaybackState.Playing)
+                Au.waveOut.Pause();
+            else if (Au.waveOut.PlaybackState == PlaybackState.Paused ||
+                     Au.waveOut.PlaybackState == PlaybackState.Stopped)
+                Au.waveOut.Play();
+        }
 
 
         //   W I N D O W   D R A G
@@ -393,6 +422,26 @@ namespace Filecast
         {
             minimising = true;
         }
+
+
+        //   G L O B A L   H O T K E Y S
+
+        private void MediaPreviousTrack(object? sender, HotkeyEventArgs e)
+        {
+            SkipShort(false);
+            e.Handled = true;
+        }
+        private void MediaNextTrack(object? sender, HotkeyEventArgs e)
+        {
+            SkipShort(true);
+            e.Handled = true;
+        }
+        private void MediaPlayPause(object? sender, HotkeyEventArgs e)
+        {
+            PlayPause();
+            e.Handled = true;
+        }
+
     }
 
     static class Au
