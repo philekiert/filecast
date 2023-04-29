@@ -24,3 +24,8 @@ Instructions:
 
 - Back & Forward media keys skip 5 seonds (owing to its intended use as a podcast player).
 - Play/Pause media key works as expected.
+<br>
+
+_____________
+<br>
+Makes use of NAudio and NHotkey nuget packages.
