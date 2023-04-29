@@ -100,6 +100,7 @@ namespace Filecast
                 ranIntoUnsupportedFile = true;
                 Au.waveOut.Stop();
             }
+            trackScrollTimeOrigin = DateTime.Now.Ticks;
         }
         void PlayFile(string file, long startPos)
         {
@@ -120,33 +121,31 @@ namespace Filecast
                 ranIntoUnsupportedFile = true;
                 Au.waveOut.Stop();
             }
+            trackScrollTimeOrigin = DateTime.Now.Ticks;
         }
 
 
         //   T E X T   U P D A T E S
 
-        int stylusRotate = 0;
-        char[] stylus = new char[] { '|', '/', '=', '\\' };
-        int fileNameScroll = 0;
         int fileNameOverflow = 0;
         string fileName = "";
         bool ranIntoUnsupportedFile = false;
+        long trackScrollTimeOrigin = 0; // Used for filename scroll, reset in PlayFile().
         void Tick(object? sender, EventArgs e)
         {
             if (Au.audioFile != null)
             {
                 if (fileName.Length > 0 && !ranIntoUnsupportedFile)
                 {
-                    // Progress stylus rotation.
-                    stylusRotate = Au.audioFile.CurrentTime.Seconds % 4;
+                    long trackScrollTime = DateTime.Now.Ticks - trackScrollTimeOrigin;
 
                     // Progress file name scroll.
                     if (fileNameOverflow > 0)
                     {
-                        int currentScroll = ((int)Au.audioFile.CurrentTime.TotalSeconds) % fileNameOverflow;
+                        int currentScroll = (int)(trackScrollTime * .0000002d) % fileNameOverflow;
                         string clip = fileName.Substring(currentScroll, 39);
 
-                        // Player only plays files with three-letter extensions, if this changes this will need a re-write.
+                        // Player only plays files with three-letter extensions. If this changes, will need a re-write.
                         if (fileNameOverflow - currentScroll <= 4)
                         {
                             runFileName.Text = clip.Remove(clip.LastIndexOf('.'));
@@ -239,13 +238,7 @@ namespace Filecast
                 {
                     // Fast skip backward.
                     if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
-                    {
-                        if (Au.audioFile.CurrentTime.TotalMinutes >= 1 &&
-                            Au.audioFile.CurrentTime.Seconds >= 1)
-                            Au.audioFile.CurrentTime -= new TimeSpan(0, 1, 0);
-                        else
-                            Au.audioFile.CurrentTime = new TimeSpan(0);
-                    }
+                        SkipLong(true);
                     // Slow skip backward.
                     else
                         SkipShort(false);
@@ -254,22 +247,11 @@ namespace Filecast
                 {
                     // Fast skip forward.
                     if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
-                    {
-                        Au.audioFile.CurrentTime += new TimeSpan(0, 1, 0);
-                        if (Au.audioFile.Position > Au.audioFile.Length)
-                            Au.audioFile.Position = Au.audioFile.Length;
-                    }
+                        SkipLong(true);
                     // Slow skip forward.
                     else
                     {
                         SkipShort(true);
-                        // If Position == Length, Tick() skips to the next track. Prevent this in case of short skip.
-                        if (Au.audioFile.Position == Au.audioFile.Length && Au.audioFile.Length > 0)
-                        {
-                            Au.audioFile.Position = Au.audioFile.Length - 1;
-                            if (Au.waveOut.PlaybackState == PlaybackState.Playing)
-                                Au.waveOut.Pause();
-                        }
                     }
                 }
 
@@ -290,9 +272,7 @@ namespace Filecast
 
                         // Forward.
                         else
-                        {
                             NextTrack(true, files);
-                        }
                     }
                     else
                     {
@@ -350,11 +330,45 @@ namespace Filecast
                     Au.audioFile.CurrentTime += new TimeSpan(0, 0, 5);
                     if (Au.audioFile.Position > Au.audioFile.Length)
                         Au.audioFile.Position = Au.audioFile.Length;
+                    // If Position == Length, Tick() skips to the next track. Prevent this in case of short skip.
+                    if (Au.audioFile.Position == Au.audioFile.Length && Au.audioFile.Length > 0)
+                    {
+                        Au.audioFile.Position = Au.audioFile.Length - 1;
+                        if (Au.waveOut.PlaybackState == PlaybackState.Playing)
+                            Au.waveOut.Pause();
+                    }
                 }
                 else
                 {
                     if (Au.audioFile.CurrentTime.TotalSeconds > 5)
                         Au.audioFile.CurrentTime -= new TimeSpan(0, 0, 5);
+                    else
+                        Au.audioFile.CurrentTime = new TimeSpan(0);
+                }
+            }
+        }
+        void SkipLong(bool forward)
+        {
+            if (Au.audioFile != null)
+            {
+                if (forward)
+                {
+                    Au.audioFile.CurrentTime += new TimeSpan(0, 1, 0);
+                    if (Au.audioFile.Position > Au.audioFile.Length)
+                        Au.audioFile.Position = Au.audioFile.Length;
+                    // If Position == Length, Tick() skips to the next track. Prevent this in case of short skip.
+                    if (Au.audioFile.Position == Au.audioFile.Length && Au.audioFile.Length > 0)
+                    {
+                        Au.audioFile.Position = Au.audioFile.Length - 1;
+                        if (Au.waveOut.PlaybackState == PlaybackState.Playing)
+                            Au.waveOut.Pause();
+                    }
+                }
+                else
+                {
+                    if (Au.audioFile.CurrentTime.TotalMinutes >= 1 &&
+                        Au.audioFile.CurrentTime.Seconds >= 1)
+                        Au.audioFile.CurrentTime -= new TimeSpan(0, 1, 0);
                     else
                         Au.audioFile.CurrentTime = new TimeSpan(0);
                 }
