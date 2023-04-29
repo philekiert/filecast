@@ -5,11 +5,16 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>FilecastLogo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="RobotoMono.ttf" />
     <None Remove="RobotoMonoItalic.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="FilecastLogo.ico" />
   </ItemGroup>
 
   <ItemGroup>
