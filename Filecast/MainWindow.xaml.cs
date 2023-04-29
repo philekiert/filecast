@@ -238,7 +238,7 @@ namespace Filecast
                 {
                     // Fast skip backward.
                     if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
-                        SkipLong(true);
+                        SkipLong(false);
                     // Slow skip backward.
                     else
                         SkipShort(false);
