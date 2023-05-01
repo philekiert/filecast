@@ -22,7 +22,7 @@ Instructions:
 - Q / E - Skip to previous or subsequent file.
 - Space - Play/Pause
 
-- Back & Forward media keys skip 5 seonds (owing to its intended use as a podcast player).
+- Back & Forward media keys skip 5 seconds (owing to its intended use as a podcast player).
 - Play/Pause media key works as expected.
 <br>
 
