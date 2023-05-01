@@ -156,7 +156,6 @@ namespace Filecast
                             runFileName.Text = clip;
                             runFileExt.Text = "";
                         }
-
                     }
                     else
                     {
@@ -376,11 +375,19 @@ namespace Filecast
         }
         void PlayPause()
         {
-            if (Au.waveOut.PlaybackState == PlaybackState.Playing)
-                Au.waveOut.Pause();
-            else if (Au.waveOut.PlaybackState == PlaybackState.Paused ||
-                     Au.waveOut.PlaybackState == PlaybackState.Stopped)
-                Au.waveOut.Play();
+            if (Au.audioFile != null)
+            {
+                if (Au.waveOut.PlaybackState == PlaybackState.Playing)
+                    Au.waveOut.Pause();
+                else if (Au.waveOut.PlaybackState == PlaybackState.Paused ||
+                         Au.waveOut.PlaybackState == PlaybackState.Stopped)
+                {
+                    if (Au.audioFile.CurrentTime >= Au.audioFile.TotalTime - new TimeSpan(1_000_000)) // One second :)
+                        NextTrack(true);
+                    Au.waveOut.Stop(); // Stop first so we don't get the last half a second or so of the last position.
+                    Au.waveOut.Play();
+                }
+            }
         }
 
 
