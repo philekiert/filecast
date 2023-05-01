@@ -9,7 +9,7 @@ Instructions:
 3) Use the hotkeys listed below to operate.
 2) When the program is closed, it will generate a .txt file with the current audio file name and position. When reopened, it will resume playing where it left off.
 
--	Note that this application will currently only play MP3, WAV and WMA files.
+-	Note that this application will currently only play MP3, WAV and WMA files, and it relies on these three-letter extensions to filter out non-audio files.
 
 <br><br><br>
 <p align="center">
