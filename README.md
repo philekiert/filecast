@@ -17,7 +17,7 @@ Instructions:
 </p>
 <br><br>
 
-## Kotkeys:
+## Hotkeys:
 - A / D - Skip forward or backward 5 seconds (hold Shift for 1 minute skips)
 - Q / E - Skip to previous or subsequent file.
 - Space - Play/Pause
