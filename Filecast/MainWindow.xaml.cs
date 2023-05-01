@@ -192,7 +192,7 @@ namespace Filecast
                     Blackout();
 
                 // Move to the next track if we're at the end.
-                if (Au.audioFile.Position >= Au.audioFile.Length)
+                if (Au.audioFile.Position >= Au.audioFile.Length && Au.waveOut.PlaybackState == PlaybackState.Playing)
                     NextTrack(true);
             }
             // If audioFile was never initialised, keep checking for tracks and Blackout() if it's ever back to null.
