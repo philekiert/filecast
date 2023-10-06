@@ -1,6 +1,6 @@
 # filecast
 
-Filecast is an aggressively minimalistic audio player, primarily designed for listening through large backlogs of podcast episodes. Imagine every feature you've ever dreamed of in an audio player - Filecast does almost none of them.
+Filecast is an aggressively minimalistic audio player, designed for listening through large backlogs of podcast episodes. Imagine every feature you've ever dreamed of in an audio player - Filecast does almost none of them.
 
 What it does do is sequentially play through a folder of audio files in alphabetical order, remembering where it was when closed and resuming when reopened, looking pretty while doing so.
 
