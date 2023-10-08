@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Media;
@@ -11,6 +12,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms.Design;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -32,27 +34,23 @@ namespace Filecast
         {
             InitializeComponent();
 
+            Blackout();
+
             HotkeyManager.Current.AddOrReplace("PreviousTrack", Key.MediaPreviousTrack, ModifierKeys.None, MediaPreviousTrack);
             HotkeyManager.Current.AddOrReplace("NextTrack", Key.MediaNextTrack, ModifierKeys.None, MediaNextTrack);
             HotkeyManager.Current.AddOrReplace("PlayPause", Key.MediaPlayPause, ModifierKeys.None, MediaPlayPause);
-
-            Blackout();
-
-            DispatcherTimer tmr = new DispatcherTimer();
-            tmr.Tick += new EventHandler(Tick);
-            tmr.Interval = new TimeSpan(10);
-            tmr.Start();
 
             // Pick up where we left off, if possible.
             List<string> files = GetFileList();
             int fileIndex = 0;
             TimeSpan filePosition = new TimeSpan(0);
-            if (files.Count > 0)
+            if (File.Exists("Filecast.txt"))
             {
-                if (File.Exists("Filecast.txt"))
+                string[] lines = File.ReadAllLines("Filecast.txt");
+
+                if (files.Count > 0)
                 {
-                    string[] lines = File.ReadAllLines("Filecast.txt");
-                    if (lines.Length >= 1)
+                    if (lines.Length >= 1 && lines[0] != "---")
                     {
                         for (int n = 0; n < files.Count; ++n)
                         {
@@ -62,14 +60,29 @@ namespace Filecast
                                 break;
                             }
                         }
-                        if (lines.Length >= 2) // Read time only if stated.
+                        if (lines.Length >= 2 && lines[1] != "---") // Read time only if stated.
                         {
-                            filePosition = TimeSpan.Parse(lines[1]);
+                            try { filePosition = TimeSpan.Parse(lines[1]); }
+                            catch { }
                         }
                     }
+                    PlayFile(files[fileIndex], filePosition);
                 }
-                PlayFile(files[fileIndex], filePosition);
+
+                // Apply list of played tracks.
+                bool start = false;
+                foreach (string line in lines)
+                    if (line.Length > 0)
+                        if (start)
+                            Au.playedTracks.Add(line, true);
+                        else if (line == "---")
+                            start = true;
             }
+
+            DispatcherTimer tmr = new DispatcherTimer();
+            tmr.Tick += new EventHandler(Tick);
+            tmr.Interval = new TimeSpan(10);
+            tmr.Start();
         }
 
         List<string> GetFileList()
@@ -137,7 +150,20 @@ namespace Filecast
             {
                 if (fileName.Length > 0 && !ranIntoUnsupportedFile)
                 {
+                    // Move to next track if stopped.
+                    if (Au.waveOut.PlaybackState == PlaybackState.Stopped)
+                    {
+                        if (fileName != "" && !Au.playedTracks.ContainsKey(fileName))
+                            Au.playedTracks.Add(fileName, true);
+                        NextTrack(true);
+                    }
+
                     long trackScrollTime = DateTime.Now.Ticks - trackScrollTimeOrigin;
+
+                    if (Au.playedTracks.ContainsKey(fileName))
+                        runStylus.Foreground = lblX.Foreground;
+                    else
+                        runStylus.Foreground = lbl_.Foreground;
 
                     // Progress file name scroll.
                     if (fileNameOverflow > 0)
@@ -189,10 +215,6 @@ namespace Filecast
                 }
                 else
                     Blackout();
-
-                // Move to the next track if we're at the end.
-                if (Au.audioFile.Position >= Au.audioFile.Length && Au.waveOut.PlaybackState == PlaybackState.Playing)
-                    NextTrack(true);
             }
             // If audioFile was never initialised, keep checking for tracks and Blackout() if it's ever back to null.
             else
@@ -201,6 +223,8 @@ namespace Filecast
                 if (GetFileList().Count > 0)
                     NextTrack(true);
             }
+
+            //if (Au.waveOut.)
         }
         void Blackout()
         {
@@ -233,7 +257,7 @@ namespace Filecast
         {
             if (Au.audioFile != null)
             {
-                if (e.Key == Key.A && fileName.Length > 0)
+                if (e.Key == Key.A && fileName.Length > 0 && !ranIntoUnsupportedFile)
                 {
                     // Fast skip backward.
                     if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
@@ -242,7 +266,7 @@ namespace Filecast
                     else
                         SkipShort(false);
                 }
-                else if (e.Key == Key.D && fileName.Length > 0)
+                else if (e.Key == Key.D && fileName.Length > 0 && !ranIntoUnsupportedFile)
                 {
                     // Fast skip forward.
                     if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
@@ -255,7 +279,7 @@ namespace Filecast
                 }
 
                 // Play/Pause
-                else if (e.Key == Key.Space && fileName.Length > 0)
+                else if (e.Key == Key.Space && fileName.Length > 0 && !ranIntoUnsupportedFile)
                     PlayPause();
 
                 // Skip track.
@@ -278,6 +302,14 @@ namespace Filecast
                         Au.waveOut.Stop();
                         fileName = "";
                     }
+                }
+
+                else if (e.Key == Key.P && fileName.Length > 0 && !ranIntoUnsupportedFile)
+                {
+                    if (Au.playedTracks.ContainsKey(fileName))
+                        Au.playedTracks.Remove(fileName);
+                    else
+                        Au.playedTracks.Add(fileName, true);
                 }
             }
         }
@@ -373,17 +405,23 @@ namespace Filecast
                 }
             }
         }
+
         void PlayPause()
         {
-            if (Au.audioFile != null)
+            if (Au.audioFile != null && !ranIntoUnsupportedFile)
             {
                 if (Au.waveOut.PlaybackState == PlaybackState.Playing)
                     Au.waveOut.Pause();
                 else if (Au.waveOut.PlaybackState == PlaybackState.Paused ||
                          Au.waveOut.PlaybackState == PlaybackState.Stopped)
                 {
-                    if (Au.audioFile.CurrentTime >= Au.audioFile.TotalTime - new TimeSpan(1_000_000)) // One second :)
+                    if (Au.audioFile.CurrentTime >= Au.audioFile.TotalTime - new TimeSpan(500_000)) // Half second :)
+                    {
                         NextTrack(true);
+                        if (fileName != "")
+                            Au.playedTracks.Add(fileName, true);
+                    }
+
                     Au.waveOut.Stop(); // Stop first so we don't get the last half a second or so of the last position.
                     Au.waveOut.Play();
                 }
@@ -462,12 +500,13 @@ namespace Filecast
             PlayPause();
             e.Handled = true;
         }
-
     }
 
     static class Au
     {
         public static WaveOutEvent waveOut = new WaveOutEvent();
         public static AudioFileReader? audioFile;
+
+        public static Dictionary<string, bool> playedTracks = new Dictionary<string, bool>();
     }
 }

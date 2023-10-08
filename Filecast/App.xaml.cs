@@ -15,8 +15,12 @@ namespace Filecast
         {
             if (Au.audioFile != null)
             {
-                string fileName = Au.audioFile.FileName + "\n" + Au.audioFile.CurrentTime.ToString(@"hh\:mm\:ss");
-                File.WriteAllText("Filecast.txt", fileName);
+                string output = Au.audioFile.FileName + "\n" + Au.audioFile.CurrentTime.ToString(@"hh\:mm\:ss");
+                output += "\n---"; // --- indicates start of played file list.
+                foreach (var playedFile in Au.playedTracks)
+                    output += "\n" + playedFile.Key;
+
+                File.WriteAllText("Filecast.txt", output);
             }
         }
     }
