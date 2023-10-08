@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:Filecast"
         mc:Ignorable="d"
         Title="Filecast" Background="Transparent" SizeToContent="WidthAndHeight" Height="90" Width="300"
-        ResizeMode="NoResize" WindowStyle="None" AllowsTransparency="True" KeyDown="Grid_KeyDown">
+        ResizeMode="NoResize" WindowStyle="None" AllowsTransparency="True" KeyDown="Grid_KeyDown"
+        MouseRightButtonUp="Window_MouseRightButtonUp">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
@@ -21,8 +22,8 @@
                     <ColumnDefinition Width="30"/>
                 </Grid.ColumnDefinitions>
                 <Label x:Name="lblTitle" Grid.Column="0" FontFamily="Roboto Mono" FontSize="12"
-                       Foreground="#FF8E9DAB" Content="Filecast" Margin="4,2,26,-2" Grid.ColumnSpan="2"
-                       MouseDown="Window_MouseDown"/>
+                       Foreground="#FF8E9DAB" Content="Filecast" Margin="-1,-1,1,1"
+                       MouseLeftButtonDown="Window_LeftButtonDown" Padding="10,7,5,5"/>
                 <Label x:Name="lbl_" Grid.Column="1" FontFamily="Roboto Mono" FontSize="16" Foreground="#FF53CCFF"
                        Content="_" Height="30" Width="30" FontWeight="SemiBold" Padding="10,1,0,0"
                        Background="#FF151515" MouseEnter="lbl__MouseEnter" MouseLeave="lbl__MouseLeave"

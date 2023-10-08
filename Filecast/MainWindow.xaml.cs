@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
@@ -36,9 +37,18 @@ namespace Filecast
 
             Blackout();
 
-            HotkeyManager.Current.AddOrReplace("PreviousTrack", Key.MediaPreviousTrack, ModifierKeys.None, MediaPreviousTrack);
-            HotkeyManager.Current.AddOrReplace("NextTrack", Key.MediaNextTrack, ModifierKeys.None, MediaNextTrack);
-            HotkeyManager.Current.AddOrReplace("PlayPause", Key.MediaPlayPause, ModifierKeys.None, MediaPlayPause);
+            try
+            {
+                HotkeyManager.Current.AddOrReplace("FilecastPreviousTrack",
+                                                   Key.MediaPreviousTrack, ModifierKeys.None, MediaPreviousTrack);
+                HotkeyManager.Current.AddOrReplace("FilecastNextTrack", Key.MediaNextTrack, ModifierKeys.None, MediaNextTrack);
+                HotkeyManager.Current.AddOrReplace("FilecastPlayPause", Key.MediaPlayPause, ModifierKeys.None, MediaPlayPause);
+            }
+            catch
+            {
+                // No need for a warning. If any of the above hotkeys are in use, the program is already loaded.
+                Close();
+            }
 
             // Pick up where we left off, if possible.
             List<string> files = GetFileList();
@@ -431,7 +441,7 @@ namespace Filecast
 
         //   W I N D O W   D R A G
 
-        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        private void Window_LeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
         }
@@ -499,6 +509,14 @@ namespace Filecast
         {
             PlayPause();
             e.Handled = true;
+        }
+
+
+        //   O P E N   W O R K I N G   D I R E C T O R Y
+
+        private void Window_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Process.Start("explorer.exe", ".");
         }
     }
 
