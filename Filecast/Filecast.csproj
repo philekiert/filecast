@@ -6,8 +6,8 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Filecast.ico</ApplicationIcon>
-    <Version>1.1</Version>
-    <FileVersion>1.1</FileVersion>
+    <Version>1.11</Version>
+    <FileVersion>1.1.1.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
