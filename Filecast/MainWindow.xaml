@@ -13,8 +13,12 @@
             <RowDefinition Height="30" />
             <RowDefinition Height="60" />
         </Grid.RowDefinitions>
+        <!-- The reason there are two borders is that the first provides the background colour so as not to leave
+             a gap between the border and background. This is a frustrating bug with anti-aliasing on WPF. -->
+        <Border Grid.Row="0" CornerRadius="10,10,0,0"
+                Height="30" Background="#FF1D1E1F"/>
         <Border Grid.Row="0" CornerRadius="10,10,0,0" BorderThickness="1,1,1,0" BorderBrush="#FF383B3E"
-                Height="30" Background="#FF1D1E1F">
+                Height="30">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
@@ -34,8 +38,15 @@
                        MouseLeftButtonDown="lblX_MouseLeftButtonDown" MouseLeftButtonUp="lblX_MouseLeftButtonUp"/>
             </Grid>
         </Border>
+
+        <!-- Margin is -1 on the top here, because at certain scalings on Windows, you can see a slight gap between
+             the two sections -->
+        <!-- The reason there are two borders is that the first provides the background colour so as not to leave
+             a gap between the border and background. This is a frustrating bug with anti-aliasing on WPF. -->
         <Border Grid.Row="1" CornerRadius="0,0,10,10" Height="60" Width="300" Background="#FF292B2D"
-                BorderThickness="1,0,1,1" BorderBrush="#FF383B3E">
+                Margin="0 -1 0 0"/>
+        <Border Grid.Row="1" CornerRadius="0,0,10,10" Height="60" Width="300"
+                BorderThickness="1,0,1,1" BorderBrush="#FF383B3E" Margin="0 -1 0 0">
             <Grid Height="50" Width="290">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="30" />
